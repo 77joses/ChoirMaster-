@@ -1,1 +1,585 @@
+<!DOCTYPE html>
+<!--
+  ╔══════════════════════════════════════════════════════════╗
+  ║  CHOIRMASTER OMR  —  FILE 1 of 7                        ║
+  ║  Shell · CSS · HTML Structure                           ║
+  ║                                                          ║
+  ║  PURPOSE: Complete visual shell. Paste this first.      ║
+  ║  Gives you the full UI with all tabs, panels, controls  ║
+  ║  and CSS — no functionality yet, just the frame.        ║
+  ║                                                          ║
+  ║  NEXT: Paste 02_globals_and_nav.js inside <script>      ║
+  ╚══════════════════════════════════════════════════════════╝
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0d0720">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ChoirMaster">
+<title>ChoirMaster OMR</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+
+<style>
+/* ── DESIGN TOKENS ── */
+:root{
+  --bg:#0d0720; --bg2:#160d30; --bg3:#1f1245;
+  --gold:#c9a84c; --gold2:#f0d080;
+  --rose:#c45c8a; --teal:#3ecfb0;
+  --text:#e8dfc8; --muted:#8878a0;
+  --border:rgba(201,168,76,0.25);
+  --card:rgba(255,255,255,0.04);
+  --r:12px;
+}
+
+/* ── RESET ── */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{
+  font-family:'Crimson Pro',serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+  font-size:16px;
+}
+/* Ambient background glow */
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 60% 40% at 20% 10%,rgba(100,40,160,0.3) 0%,transparent 60%),
+    radial-gradient(ellipse 50% 50% at 80% 80%,rgba(196,92,138,0.15) 0%,transparent 60%);
+  pointer-events:none;z-index:0;
+}
+
+/* ── LAYOUT ── */
+.page{position:relative;z-index:1;max-width:520px;margin:0 auto;padding:12px 14px 90px;}
+
+/* ── HEADER ── */
+header{text-align:center;padding:18px 0 12px;border-bottom:1px solid var(--border);margin-bottom:14px;}
+header .cross{font-size:16px;color:var(--gold);letter-spacing:5px;margin-bottom:4px;opacity:.8;}
+header h1{
+  font-family:'Cinzel',serif;font-size:21px;font-weight:700;
+  background:linear-gradient(135deg,var(--gold) 0%,var(--gold2) 50%,var(--gold) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  letter-spacing:2px;
+}
+header p{font-style:italic;color:var(--muted);font-size:12px;margin-top:3px;}
+
+/* ── TAB BAR ── */
+.tabs{
+  position:fixed;bottom:0;left:0;right:0;
+  background:rgba(13,7,32,0.97);
+  border-top:1px solid var(--border);
+  display:flex;padding:5px 2px 8px;
+  z-index:50;backdrop-filter:blur(12px);
+}
+.tab{
+  flex:1;background:none;border:none;
+  color:var(--muted);
+  font-family:'Cinzel',serif;font-size:9px;
+  padding:5px 1px 3px;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  transition:color .2s;
+}
+.tab .ti{font-size:18px;line-height:1;}
+.tab.active{color:var(--gold);}
+
+/* ── PANELS ── */
+.panel{display:none;}
+.panel.active{display:block;animation:fi .3s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── CARDS ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px;}
+.card-title{
+  font-family:'Cinzel',serif;font-size:11px;color:var(--gold);
+  letter-spacing:1.5px;text-transform:uppercase;
+  margin-bottom:9px;display:flex;align-items:center;gap:6px;
+}
+
+/* ── UPLOAD ZONE ── */
+.upload-zone{
+  border:2px dashed rgba(201,168,76,0.3);border-radius:10px;
+  padding:20px 14px;text-align:center;cursor:pointer;
+  background:rgba(201,168,76,0.03);transition:all .2s;
+}
+.upload-zone:active,.upload-zone.drag{border-color:var(--gold);background:rgba(201,168,76,.07);}
+.upload-zone .ico{font-size:30px;margin-bottom:6px;}
+.upload-zone p{color:var(--muted);font-size:13px;}
+.upload-zone strong{color:var(--gold2);}
+#fileInput{display:none;}
+
+/* Camera button */
+.btn-cam{
+  width:100%;margin-top:8px;
+  background:rgba(62,207,176,.1);border:1px solid rgba(62,207,176,.4);
+  color:var(--teal);font-family:'Cinzel',serif;font-size:12px;
+  padding:11px;border-radius:8px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:7px;
+}
+
+/* ── STAFF MODE SELECTOR ── */
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+.mode-btn{
+  background:var(--bg3);border:1px solid var(--border);border-radius:10px;
+  padding:12px 8px;cursor:pointer;text-align:center;transition:all .25s;
+}
+.mode-btn.active{border-color:var(--gold);background:rgba(201,168,76,.1);}
+.mode-btn .mode-ico{font-size:22px;margin-bottom:4px;}
+.mode-btn .mode-title{font-family:'Cinzel',serif;font-size:11px;color:var(--gold2);letter-spacing:.5px;}
+.mode-btn .mode-sub{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4;}
+
+/* ── CANVAS DISPLAY ── */
+#canvasWrap{position:relative;margin-top:10px;display:none;}
+#mainCanvas{width:100%;border-radius:8px;border:1px solid var(--border);display:block;background:#fff;}
+#overlayCanvas{position:absolute;top:0;left:0;width:100%;height:100%;border-radius:8px;pointer-events:none;}
+
+/* ── PIPELINE LOG ── */
+#pipelineLog{
+  background:var(--bg3);border:1px solid var(--border);border-radius:8px;
+  padding:10px;font-size:11px;font-family:monospace;color:var(--teal);
+  max-height:200px;overflow-y:auto;margin-top:8px;line-height:1.8;display:none;
+}
+.log-ok{color:var(--teal);}
+.log-warn{color:var(--gold);}
+.log-err{color:var(--rose);}
+.log-info{color:var(--muted);}
+
+/* ── PIPELINE STAGES ── */
+.stages{display:flex;gap:4px;margin-top:8px;flex-wrap:wrap;}
+.stage{
+  font-family:'Cinzel',serif;font-size:9px;padding:4px 7px;
+  border-radius:20px;border:1px solid var(--border);
+  color:var(--muted);letter-spacing:.5px;transition:all .3s;
+}
+.stage.active{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.1);}
+.stage.done{border-color:var(--teal);color:var(--teal);background:rgba(62,207,176,.08);}
+.stage.err{border-color:var(--rose);color:var(--rose);}
+
+/* ── RESULTS ── */
+.info-box{
+  background:rgba(13,7,32,.85);border:1px solid var(--gold);
+  border-radius:6px;padding:8px 10px;font-size:12px;margin-top:6px;
+  color:var(--text);line-height:1.7;
+}
+#resultTable{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px;}
+#resultTable th{
+  font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;
+  color:var(--gold);padding:5px 6px;border-bottom:1px solid var(--border);text-align:left;
+}
+#resultTable td{padding:4px 6px;border-bottom:1px solid rgba(201,168,76,.1);color:var(--text);}
+.pitch-badge{
+  display:inline-block;background:rgba(62,207,176,.12);
+  border:1px solid rgba(62,207,176,.3);color:var(--teal);
+  border-radius:4px;padding:1px 5px;font-family:monospace;font-size:11px;
+}
+
+/* ── PLAYBACK ── */
+.pb{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px;}
+.play-row{display:flex;align-items:center;gap:10px;margin-bottom:11px;}
+.btn-play{
+  width:54px;height:54px;border-radius:50%;
+  background:linear-gradient(135deg,var(--gold),#a07830);
+  border:none;color:var(--bg);font-size:20px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 16px rgba(201,168,76,.4);flex-shrink:0;
+}
+.btn-play:active{transform:scale(.9);}
+.btn-sm{
+  background:var(--card);border:1px solid var(--border);
+  color:var(--muted);padding:7px 11px;border-radius:7px;
+  font-family:'Cinzel',serif;font-size:10px;cursor:pointer;
+}
+.btn-sm.on{color:var(--gold);border-color:var(--gold);}
+
+/* Progress bar */
+.prog-track{width:100%;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-bottom:5px;cursor:pointer;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--rose));border-radius:3px;width:0%;}
+.time-row{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:7px;}
+
+/* Lyric line */
+.lyric-display{text-align:center;font-size:14px;font-style:italic;color:var(--gold2);min-height:22px;margin-bottom:7px;}
+
+/* VU Meters */
+.part-meters{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:7px;}
+.meter-col{text-align:center;}
+.meter-label{font-family:'Cinzel',serif;font-size:8px;color:var(--muted);margin-bottom:2px;}
+.meter-bar{height:32px;background:var(--bg3);border-radius:3px;position:relative;overflow:hidden;border:1px solid var(--border);}
+.meter-fill{position:absolute;bottom:0;left:0;right:0;border-radius:2px;transition:height .1s ease;}
+.mf-s{background:linear-gradient(to top,#c45c8a,#f0a0c0);}
+.mf-a{background:linear-gradient(to top,#7040c0,#c0a0f0);}
+.mf-t{background:linear-gradient(to top,#2080c0,#a0d0f0);}
+.mf-b{background:linear-gradient(to top,#20a060,#a0f0c0);}
+
+/* Sliders */
+.sl-row{display:flex;align-items:center;gap:8px;margin-top:9px;}
+.sl-row label{font-family:'Cinzel',serif;font-size:10px;color:var(--muted);width:58px;flex-shrink:0;}
+.sl-row input[type=range]{flex:1;accent-color:var(--gold);height:4px;}
+.sl-val{font-size:12px;color:var(--gold2);width:48px;text-align:right;font-family:'Cinzel',serif;}
+
+/* Organ + parts grids */
+.organ-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;}
+.parts-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.part-card{background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:11px 9px;transition:all .3s;}
+.part-card.on{border-color:var(--gold);}
+.part-label{font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;color:var(--muted);margin-bottom:4px;}
+.part-name{font-size:15px;font-weight:600;margin-bottom:5px;}
+.part-name.s{color:#f0a0c0;}.part-name.a{color:#c0a0f0;}
+.part-name.t{color:#a0d0f0;}.part-name.b{color:#a0f0c0;}
+.part-toggle{display:flex;align-items:center;gap:5px;font-size:11px;cursor:pointer;}
+
+/* Toggle switch */
+.tog{width:29px;height:15px;background:var(--bg);border-radius:8px;border:1px solid var(--border);position:relative;transition:.3s;flex-shrink:0;}
+.tog.on{background:rgba(201,168,76,.3);border-color:var(--gold);}
+.tog::after{content:'';width:9px;height:9px;background:var(--muted);border-radius:50%;position:absolute;top:2px;left:2px;transition:.3s;}
+.tog.on::after{transform:translateX(14px);background:var(--gold);}
+
+/* Buttons */
+.btn-gold{
+  width:100%;background:rgba(201,168,76,.12);border:1px solid var(--gold);
+  color:var(--gold);font-family:'Cinzel',serif;font-size:12px;padding:12px;
+  border-radius:9px;cursor:pointer;margin-bottom:8px;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+
+/* MIDI row */
+.midi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:5px;}
+.btn-part{
+  background:var(--bg3);border:1px solid var(--border);color:var(--muted);
+  font-size:10px;font-family:'Cinzel',serif;padding:10px 2px;
+  border-radius:7px;cursor:pointer;text-align:center;
+}
+.btn-part:active{border-color:var(--gold);color:var(--gold);}
+
+/* Library */
+.song-item{
+  display:flex;align-items:center;gap:9px;padding:10px;
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:9px;margin-bottom:6px;cursor:pointer;
+}
+.song-item:active{border-color:var(--gold);}
+.song-thumb{font-size:18px;flex-shrink:0;}
+.song-info{flex:1;min-width:0;}
+.song-title{font-size:14px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.song-meta{font-size:11px;color:var(--muted);font-style:italic;}
+.muted-msg{color:var(--muted);font-size:13px;font-style:italic;text-align:center;padding:12px 0;}
+
+/* Toast */
+#toast{
+  position:fixed;bottom:72px;left:50%;
+  transform:translateX(-50%) translateY(110px);
+  background:var(--bg2);border:1px solid var(--gold);
+  color:var(--text);padding:9px 16px;border-radius:26px;
+  font-size:13px;box-shadow:0 8px 26px rgba(0,0,0,.6);
+  transition:transform .4s cubic-bezier(.34,1.56,.64,1);
+  z-index:999;white-space:nowrap;max-width:92vw;text-align:center;
+}
+#toast.show{transform:translateX(-50%) translateY(0);}
+
+/* Spinner */
+.spinner{width:13px;height:13px;border:2px solid rgba(201,168,76,.3);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;display:inline-block;vertical-align:middle;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Audio banner */
+#audioUnlockBanner{
+  background:linear-gradient(135deg,rgba(201,168,76,0.2),rgba(201,168,76,0.06));
+  border:1px solid var(--gold);border-radius:var(--r);
+  padding:12px 14px;margin-bottom:12px;
+  display:flex;align-items:center;gap:11px;cursor:pointer;
+}
+#audioUnlockBanner .ico{font-size:24px;flex-shrink:0;}
+#audioUnlockBanner p{font-size:13px;color:var(--gold2);line-height:1.4;}
+#audioUnlockBanner p small{color:var(--muted);display:block;font-size:11px;}
+#audioUnlockBanner.hidden{display:none;}
+
+/* Camera modal */
+#camModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:200;flex-direction:column;align-items:center;justify-content:center;padding:14px;}
+#camModal.open{display:flex;}
+#camVideo{width:100%;max-width:480px;border-radius:8px;border:2px solid var(--gold);}
+.cam-ctrl{display:flex;gap:14px;margin-top:14px;align-items:center;}
+.btn-cap{width:62px;height:62px;border-radius:50%;background:var(--gold);border:4px solid rgba(255,255,255,.4);cursor:pointer;}
+.btn-can{background:none;border:1px solid rgba(255,255,255,.3);color:#fff;padding:12px 18px;border-radius:9px;cursor:pointer;font-family:'Cinzel',serif;font-size:12px;}
+#camCanvas{display:none;}
+
+/* Utilities */
+.dvd{height:1px;background:var(--border);margin:10px 0;}
+.row2{display:flex;gap:7px;}.row2>*{flex:1;}
+#cvStatus{font-size:12px;color:var(--muted);font-style:italic;text-align:center;padding:8px;display:none;}
+#cvStatus.show{display:block;}
+</style>
+</head>
+
+<body>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!--  CAMERA MODAL                                   -->
+<!-- ═══════════════════════════════════════════════ -->
+<div id="camModal">
+  <video id="camVideo" autoplay playsinline muted></video>
+  <canvas id="camCanvas"></canvas>
+  <div class="cam-ctrl">
+    <button class="btn-can" onclick="closeCam()">✕ Cancel</button>
+    <button class="btn-cap" onclick="capturePhoto()"></button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!--  MAIN PAGE                                      -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="page">
+
+  <header>
+    <div class="cross">✦ ✝ ✦</div>
+    <h1>ChoirMaster OMR</h1>
+    <p>Sheet Music Recognition · SATB Church Choir</p>
+  </header>
+
+  <!-- Audio unlock banner (Chrome Android) -->
+  <div id="audioUnlockBanner" onclick="unlockAudio()">
+    <div class="ico">🔊</div>
+    <p>Tap here to enable audio
+      <small>Required once by Chrome on Android</small>
+    </p>
+  </div>
+
+  <!-- OpenCV loading indicator -->
+  <div id="cvStatus">⏳ Loading vision engine (OpenCV.js)…</div>
+
+  <!-- ════════════════ SCAN TAB ════════════════ -->
+  <div class="panel active" id="panel-scan">
+
+    <!-- Staff mode chooser -->
+    <div class="card">
+      <div class="card-title"><span>🎼</span> Score Layout</div>
+      <div class="mode-grid">
+        <div class="mode-btn active" id="mode-4" onclick="setMode(4)">
+          <div class="mode-ico">𝄞𝄞𝄞𝄞</div>
+          <div class="mode-title">4 STAVES</div>
+          <div class="mode-sub">One per voice<br>S · A · T · B separate</div>
+        </div>
+        <div class="mode-btn" id="mode-2" onclick="setMode(2)">
+          <div class="mode-ico">𝄞𝄢</div>
+          <div class="mode-title">2 STAVES</div>
+          <div class="mode-sub">Grand staff<br>SA treble · TB bass</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Upload -->
+    <div class="card">
+      <div class="card-title"><span>📷</span> Upload Score</div>
+      <div class="upload-zone" id="dropZone"
+           onclick="document.getElementById('fileInput').click()"
+           ondragover="event.preventDefault();this.classList.add('drag')"
+           ondragleave="this.classList.remove('drag')"
+           ondrop="handleDrop(event)">
+        <div class="ico">🎼</div>
+        <p><strong>Tap to upload image or PDF</strong></p>
+        <p style="margin-top:3px;font-size:12px">JPG · PNG · PDF — printed scores work best</p>
+      </div>
+      <input type="file" id="fileInput" accept="image/*,.pdf" onchange="handleFile(this.files[0])">
+      <button class="btn-cam" onclick="openCam()">📷 &nbsp;Use Camera</button>
+
+      <!-- Pipeline stages -->
+      <div class="stages" id="stages">
+        <div class="stage" id="st-load">Load</div>
+        <div class="stage" id="st-thresh">Threshold</div>
+        <div class="stage" id="st-staff">Staves</div>
+        <div class="stage" id="st-clef">Clef</div>
+        <div class="stage" id="st-key">Key</div>
+        <div class="stage" id="st-time">Time</div>
+        <div class="stage" id="st-notes">Notes</div>
+        <div class="stage" id="st-pitch">Pitch</div>
+        <div class="stage" id="st-rhythm">Rhythm</div>
+        <div class="stage" id="st-voices">Voices</div>
+      </div>
+
+      <!-- Canvas display -->
+      <div id="canvasWrap">
+        <canvas id="mainCanvas"></canvas>
+        <canvas id="overlayCanvas"></canvas>
+      </div>
+
+      <!-- Pipeline log -->
+      <div id="pipelineLog"></div>
+      <div id="detectionInfo" style="display:none" class="info-box"></div>
+    </div>
+
+    <!-- Extracted notes table -->
+    <div class="card" id="notesCard" style="display:none">
+      <div class="card-title"><span>🎵</span> Extracted Notes</div>
+      <div style="overflow-x:auto">
+        <table id="resultTable">
+          <thead>
+            <tr><th>M</th><th>Beat</th><th>Pitch</th><th>Dur</th><th>Voice</th></tr>
+          </thead>
+          <tbody id="notesBody"></tbody>
+        </table>
+      </div>
+      <div class="row2" style="margin-top:10px">
+        <button class="btn-gold" style="margin:0" onclick="go('play');setTimeout(startPlay,300)">▶ Play</button>
+        <button class="btn-gold" style="margin:0;background:rgba(62,207,176,.1);border-color:var(--teal);color:var(--teal)" onclick="go('midi')">🎹 MIDI</button>
+      </div>
+    </div>
+
+    <!-- SATB voice toggles -->
+    <div class="card" id="partsCard" style="display:none">
+      <div class="card-title"><span>🎵</span> Voices</div>
+      <div class="parts-grid">
+        <div class="part-card on" id="pc-S">
+          <div class="part-label">SOPRANO</div>
+          <div class="part-name s">Voice I</div>
+          <div class="part-toggle" onclick="togglePart('S')">
+            <div class="tog on" id="tog-S"></div>
+            <span style="font-size:11px;color:var(--muted)">Active</span>
+          </div>
+        </div>
+        <div class="part-card on" id="pc-A">
+          <div class="part-label">ALTO</div>
+          <div class="part-name a">Voice II</div>
+          <div class="part-toggle" onclick="togglePart('A')">
+            <div class="tog on" id="tog-A"></div>
+            <span style="font-size:11px;color:var(--muted)">Active</span>
+          </div>
+        </div>
+        <div class="part-card on" id="pc-T">
+          <div class="part-label">TENOR</div>
+          <div class="part-name t">Voice III</div>
+          <div class="part-toggle" onclick="togglePart('T')">
+            <div class="tog on" id="tog-T"></div>
+            <span style="font-size:11px;color:var(--muted)">Active</span>
+          </div>
+        </div>
+        <div class="part-card on" id="pc-B">
+          <div class="part-label">BASS</div>
+          <div class="part-name b">Voice IV</div>
+          <div class="part-toggle" onclick="togglePart('B')">
+            <div class="tog on" id="tog-B"></div>
+            <span style="font-size:11px;color:var(--muted)">Active</span>
+          </div>
+        </div>
+      </div>
+      <div class="row2" style="margin-top:10px">
+        <button class="btn-sm" onclick="allOn()">All On</button>
+        <button class="btn-sm" onclick="allMute()">All Mute</button>
+      </div>
+    </div>
+  </div><!-- /panel-scan -->
+
+  <!-- ════════════════ PLAY TAB ════════════════ -->
+  <div class="panel" id="panel-play">
+    <div class="pb">
+      <div class="play-row">
+        <button class="btn-play" id="playBtn" onclick="togglePlay()">▶</button>
+        <div style="flex:1;min-width:0">
+          <div style="font-family:'Cinzel',serif;font-size:13px;color:var(--gold2);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="npTitle">No score loaded</div>
+          <div style="font-size:11px;color:var(--muted)" id="npParts">Scan a score first</div>
+        </div>
+        <button class="btn-sm" id="loopBtn" onclick="toggleLoop()">↻</button>
+      </div>
+      <div class="lyric-display" id="lyricDisplay">♪</div>
+      <div class="prog-track" onclick="seekClick(event)">
+        <div class="prog-fill" id="progFill"></div>
+      </div>
+      <div class="time-row"><span id="tCur">0:00</span><span id="tTot">0:00</span></div>
+      <div class="part-meters">
+        <div class="meter-col"><div class="meter-label">SOPR</div><div class="meter-bar"><div class="meter-fill mf-s" id="mS" style="height:0%"></div></div></div>
+        <div class="meter-col"><div class="meter-label">ALTO</div><div class="meter-bar"><div class="meter-fill mf-a" id="mA" style="height:0%"></div></div></div>
+        <div class="meter-col"><div class="meter-label">TENOR</div><div class="meter-bar"><div class="meter-fill mf-t" id="mT" style="height:0%"></div></div></div>
+        <div class="meter-col"><div class="meter-label">BASS</div><div class="meter-bar"><div class="meter-fill mf-b" id="mB" style="height:0%"></div></div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span>🎛️</span> Controls</div>
+      <div class="sl-row">
+        <label>Tempo</label>
+        <input type="range" min="40" max="160" value="80" id="tempoSl" oninput="setTempo(this.value)">
+        <span class="sl-val" id="tempoV">80 BPM</span>
+      </div>
+      <div class="sl-row">
+        <label>Transpose</label>
+        <input type="range" min="-12" max="12" value="0" id="transSl" oninput="setTranspose(this.value)">
+        <span class="sl-val" id="transV">0</span>
+      </div>
+      <div class="sl-row">
+        <label>Volume</label>
+        <input type="range" min="0" max="100" value="80" id="volSl" oninput="setVolume(this.value)">
+        <span class="sl-val" id="volV">80%</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span>🎹</span> Organ Voice</div>
+      <div class="organ-grid">
+        <button class="btn-sm on" onclick="setOrgan('pipe',this)">🎵 Pipe Organ</button>
+        <button class="btn-sm" onclick="setOrgan('reed',this)">🎶 Reed Organ</button>
+        <button class="btn-sm" onclick="setOrgan('flute',this)">🪈 Flute Pipes</button>
+        <button class="btn-sm" onclick="setOrgan('strings',this)">🎻 Strings</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span>📚</span> Saved Scores</div>
+      <div id="library"><p class="muted-msg">No scores yet.</p></div>
+    </div>
+  </div><!-- /panel-play -->
+
+  <!-- ════════════════ MIDI TAB ════════════════ -->
+  <div class="panel" id="panel-midi">
+    <div class="card">
+      <div class="card-title"><span>🎹</span> Export MIDI</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:12px">Download .mid files for any music app or DAW.</p>
+      <button class="btn-gold" onclick="exportMidi('all')">⬇️ &nbsp;Full Score (all parts)</button>
+      <div class="dvd"></div>
+      <div class="card-title" style="margin-bottom:6px"><span>✦</span> Individual Parts</div>
+      <div class="midi-row">
+        <button class="btn-part" onclick="exportMidi('soprano')">Soprano</button>
+        <button class="btn-part" onclick="exportMidi('alto')">Alto</button>
+        <button class="btn-part" onclick="exportMidi('tenor')">Tenor</button>
+        <button class="btn-part" onclick="exportMidi('bass')">Bass</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span>ℹ️</span> Score Info</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.9" id="midiInfo">No score loaded.</div>
+    </div>
+  </div><!-- /panel-midi -->
+
+</div><!-- /page -->
+
+<!-- ── BOTTOM NAV ── -->
+<nav class="tabs">
+  <button class="tab active" id="tab-scan" onclick="go('scan')"><span class="ti">📷</span>Scan</button>
+  <button class="tab" id="tab-play" onclick="go('play')"><span class="ti">🎵</span>Play</button>
+  <button class="tab" id="tab-midi" onclick="go('midi')"><span class="ti">🎹</span>MIDI</button>
+</nav>
+<div id="toast"></div>
+
+<!--
+  ════════════════════════════════════════════════════════
+  PASTE YOUR JAVASCRIPT MODULES BELOW IN ORDER:
+    02_globals_and_nav.js
+    03_file_handler.js
+    04_omr_pipeline.js
+    05_audio_engine.js
+    06_score_library.js
+    07_midi_and_camera.js
+  ════════════════════════════════════════════════════════
+-->
+<script>
+  /* JS modules go here */
+</script>
+
+<!-- OpenCV — must load AFTER the script block -->
+<script async src="https://docs.opencv.org/4.8.0/opencv.js"
+        onload="onOpenCvReady()"
+        onerror="onOpenCvError()"></script>
+
+</body>
+</html>
 
